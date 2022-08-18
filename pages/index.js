@@ -8,13 +8,100 @@ import {
 } from "@tabler/icons";
 
 export default function Home() {
-  const deleteTodo = (idx) => {};
+  const [todos, setTodos] = useState([]);
+  const [newTodo, setNewTodo] = useState("");
+  const [all, setAll] = useState(0);
+  const [completed, setCompleted] = useState(0);
+  const [pending, setPending] = useState(0);
 
-  const markTodo = (idx) => {};
+  useEffect(() => {
+    const todo = localStorage.getItem("react-todos");
+    if (todo === null) {
+      setTodos([]);
+    } else {
+      setTodos(JSON.parse(todo));
+      setAll(JSON.parse(todo).length);
+      setCompleted(JSON.parse(todo).filter((todo) => todo.completed).length);
+      setPending(JSON.parse(todo).filter((todo) => !todo.completed).length);
+    }
+  }, []);
 
-  const moveUp = (idx) => {};
+  const [firstRender, setFirstRender] = useState(true);
 
-  const moveDown = (idx) => {};
+  useEffect(() => {
+    if (firstRender) {
+      setFirstRender(false);
+      return;
+    } else {
+      saveTodo();
+    }
+  }, [todos]);
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (e.target.value == "") {
+        alert("To do cannot be empty");
+      } else {
+        setPending(pending + 1);
+        setAll(all + 1);
+        setTodos(
+          [...todos, { title: e.target.value, completed: false }].reverse()
+        );
+        setNewTodo("");
+      }
+    }
+  };
+
+  const deleteTodo = (idx) => {
+    todos.splice(idx, 1);
+    setAll(all - 1);
+    setPending(pending - 1);
+    if (completed == 0) {
+      setCompleted(0);
+    } else {
+      setCompleted(completed - 1);
+    }
+    const newTodos = [...todos];
+    setTodos(newTodos);
+  };
+
+  const markTodo = (idx) => {
+    todos[idx].completed = !todos[idx].completed;
+    if (todos[idx].completed) {
+      setCompleted(completed + 1);
+      setPending(pending - 1);
+    } else {
+      setCompleted(completed - 1);
+      setPending(pending + 1);
+    }
+    setTodos([...todos]);
+  };
+
+  const moveUp = (idx) => {
+    if (idx > 0) {
+      const newTodos = [...todos];
+      const temp = newTodos[idx];
+      newTodos[idx] = newTodos[idx - 1];
+      newTodos[idx - 1] = temp;
+      setTodos(newTodos);
+    }
+  };
+
+  const moveDown = (idx) => {
+    if (idx < todos.length - 1) {
+      const newTodos = [...todos];
+      const temp = newTodos[idx];
+      newTodos[idx] = newTodos[idx + 1];
+      newTodos[idx + 1] = temp;
+      setTodos(newTodos);
+    }
+  };
+
+  const saveTodo = () => {
+    const todosStr = JSON.stringify(todos);
+    localStorage.setItem("react-todos", todosStr);
+  };
 
   return (
     <div>
@@ -28,40 +115,36 @@ export default function Home() {
         <input
           className="form-control mb-1 fs-4"
           placeholder="insert todo here..."
+          onChange={(e) => setNewTodo(e.target.value)}
+          onKeyDown={handleKeyDown}
+          value={newTodo}
         />
         {/* Todos */}
-        {/* Example 1 */}
-        <div className="border-bottom p-1 py-2 fs-2 d-flex gap-2">
-          <span className="me-auto">Todo</span>
-        </div>
-        {/* Example 2 */}
-        <div className="border-bottom p-1 py-2 fs-2 d-flex gap-2">
-          <span className="me-auto">Todo with buttons</span>
 
-          <button className="btn btn-success">
-            <IconCheck />
-          </button>
-          <button className="btn btn-secondary">
-            <IconArrowUp />
-          </button>
-          <button className="btn btn-secondary">
-            <IconArrowDown />
-          </button>
-          <button className="btn btn-danger">
-            <IconTrash />
-          </button>
+        <div>
+          {todos.map((todo, idx) => (
+            <Todo
+              key={idx}
+              title={todo.title}
+              completed={todo.completed}
+              onMark={() => markTodo(idx)}
+              onDelete={() => deleteTodo(idx)}
+              onMoveUp={() => moveUp(idx)}
+              onMoveDown={() => moveDown(idx)}
+            />
+          ))}
         </div>
 
         {/* summary section */}
         <p className="text-center fs-4">
-          <span className="text-primary">All (2) </span>
-          <span className="text-warning">Pending (2) </span>
-          <span className="text-success">Completed (0)</span>
+          <span className="text-primary">All ({all}) </span>
+          <span className="text-warning">Pending ({pending}) </span>
+          <span className="text-success">Completed ({completed})</span>
         </p>
 
         {/* Made by section */}
         <p className="text-center mt-3 text-muted fst-italic">
-          made by Chayanin Suatap 12345679
+          made by Natthaphong Thepphithak 640610634
         </p>
       </div>
     </div>
