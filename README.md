@@ -15,4 +15,4 @@ npm run dev
 
 ให้นศ.ศึกษาวิธีการ build ใน **codesandbox.io** ได้จาก slide **Slide 10 - React Part One (extras)**
 
-(ใส่ URL ที่นี่)
+(ใส่ URL ที่นี่) https://z36bw6.sse.codesandbox.io/
